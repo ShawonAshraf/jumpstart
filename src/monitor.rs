@@ -1,9 +1,9 @@
-use winapi::um::winuser::{EnumDisplayMonitors, GetMonitorInfoW, MONITORINFOEXW};
-use winapi::shared::windef::{HMONITOR, HDC, LPRECT};
-use winapi::shared::minwindef::{DWORD, LPARAM, BOOL, TRUE};
-use widestring::U16CString;
-use std::ptr;
 use std::mem;
+use std::ptr;
+use widestring::U16CString;
+use winapi::shared::minwindef::{BOOL, DWORD, LPARAM, TRUE};
+use winapi::shared::windef::{HDC, HMONITOR, LPRECT};
+use winapi::um::winuser::{EnumDisplayMonitors, GetMonitorInfoW, MONITORINFOEXW};
 
 #[derive(Clone)]
 pub struct MonitorInfo {
@@ -17,38 +17,63 @@ impl std::fmt::Debug for MonitorInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("MonitorInfo")
             .field("handle", &self.handle)
-            .field("rect", &format!("RECT {{ left: {}, top: {}, right: {}, bottom: {} }}", 
-                                   self.rect.left, self.rect.top, self.rect.right, self.rect.bottom))
-            .field("work_area", &format!("RECT {{ left: {}, top: {}, right: {}, bottom: {} }}", 
-                                        self.work_area.left, self.work_area.top, self.work_area.right, self.work_area.bottom))
+            .field(
+                "rect",
+                &format!(
+                    "RECT {{ left: {}, top: {}, right: {}, bottom: {} }}",
+                    self.rect.left, self.rect.top, self.rect.right, self.rect.bottom
+                ),
+            )
+            .field(
+                "work_area",
+                &format!(
+                    "RECT {{ left: {}, top: {}, right: {}, bottom: {} }}",
+                    self.work_area.left,
+                    self.work_area.top,
+                    self.work_area.right,
+                    self.work_area.bottom
+                ),
+            )
             .field("device_name", &self.device_name)
             .finish()
     }
 }
 
-unsafe extern "system" fn monitor_enum_proc(hmonitor: HMONITOR, _hdc: HDC, _rect: LPRECT, data: LPARAM) -> BOOL {
+unsafe extern "system" fn monitor_enum_proc(
+    hmonitor: HMONITOR,
+    _hdc: HDC,
+    _rect: LPRECT,
+    data: LPARAM,
+) -> BOOL {
     let monitors = data as *mut Vec<MonitorInfo>;
-    
+
     let mut monitor_info: MONITORINFOEXW = unsafe { mem::zeroed() };
     monitor_info.cbSize = mem::size_of::<MONITORINFOEXW>() as DWORD;
-    
-    if unsafe { GetMonitorInfoW(hmonitor, &mut monitor_info as *mut MONITORINFOEXW as *mut winapi::um::winuser::MONITORINFO) != 0 } {
+
+    if unsafe {
+        GetMonitorInfoW(
+            hmonitor,
+            &mut monitor_info as *mut MONITORINFOEXW as *mut winapi::um::winuser::MONITORINFO,
+        ) != 0
+    } {
         let device_name = unsafe {
-            U16CString::from_ptr_str(monitor_info.szDevice.as_ptr()).to_string_lossy().to_string()
+            U16CString::from_ptr_str(monitor_info.szDevice.as_ptr())
+                .to_string_lossy()
+                .to_string()
         };
-        
+
         let monitor = MonitorInfo {
             handle: hmonitor,
             rect: monitor_info.rcMonitor,
             work_area: monitor_info.rcWork,
             device_name,
         };
-        
+
         unsafe {
             (*monitors).push(monitor);
         }
     }
-    
+
     TRUE
 }
 
@@ -72,24 +97,19 @@ pub fn get_monitor_by_number(monitors: &[MonitorInfo], number: u32) -> Option<&M
     monitors.get((number - 1) as usize)
 }
 
-pub fn calculate_window_position(monitor: &MonitorInfo, side: &crate::config::Side) -> (i32, i32, i32, i32) {
+pub fn calculate_window_position(
+    monitor: &MonitorInfo,
+    side: &crate::config::Side,
+) -> (i32, i32, i32, i32) {
     let work_area = &monitor.work_area;
     let width = work_area.right - work_area.left;
     let height = work_area.bottom - work_area.top;
-    
+
     match side {
-        crate::config::Side::Left => (
-            work_area.left,
-            work_area.top,
-            width / 2,
-            height,
-        ),
-        crate::config::Side::Right => (
-            work_area.left + width / 2,
-            work_area.top,
-            width / 2,
-            height,
-        ),
+        crate::config::Side::Left => (work_area.left, work_area.top, width / 2, height),
+        crate::config::Side::Right => {
+            (work_area.left + width / 2, work_area.top, width / 2, height)
+        }
     }
 }
 
@@ -102,21 +122,47 @@ mod tests {
         let monitors = vec![
             MonitorInfo {
                 handle: ptr::null_mut(),
-                rect: winapi::shared::windef::RECT { left: 0, top: 0, right: 1920, bottom: 1080 },
-                work_area: winapi::shared::windef::RECT { left: 0, top: 0, right: 1920, bottom: 1040 },
+                rect: winapi::shared::windef::RECT {
+                    left: 0,
+                    top: 0,
+                    right: 1920,
+                    bottom: 1080,
+                },
+                work_area: winapi::shared::windef::RECT {
+                    left: 0,
+                    top: 0,
+                    right: 1920,
+                    bottom: 1040,
+                },
                 device_name: "Monitor1".to_string(),
             },
             MonitorInfo {
                 handle: ptr::null_mut(),
-                rect: winapi::shared::windef::RECT { left: 1920, top: 0, right: 3840, bottom: 1080 },
-                work_area: winapi::shared::windef::RECT { left: 1920, top: 0, right: 3840, bottom: 1040 },
+                rect: winapi::shared::windef::RECT {
+                    left: 1920,
+                    top: 0,
+                    right: 3840,
+                    bottom: 1080,
+                },
+                work_area: winapi::shared::windef::RECT {
+                    left: 1920,
+                    top: 0,
+                    right: 3840,
+                    bottom: 1040,
+                },
                 device_name: "Monitor2".to_string(),
             },
         ];
 
         // Test valid monitor numbers
-        assert_eq!(get_monitor_by_number(&monitors, 1).unwrap().device_name, "Monitor1");
-        assert_eq!(get_monitor_by_number(&monitors, 2).unwrap().device_name, "Monitor2");
+        assert_eq!(
+            get_monitor_by_number(&monitors, 1).unwrap().device_name,
+            "Monitor1"
+        );
+        assert_eq!(
+            get_monitor_by_number(&monitors, 2).unwrap().device_name,
+            "Monitor2"
+        );
 
         // Test invalid monitor numbers
         assert!(get_monitor_by_number(&monitors, 0).is_none());
@@ -127,8 +173,18 @@ mod tests {
     fn test_calculate_window_position() {
         let monitor = MonitorInfo {
             handle: ptr::null_mut(),
-            rect: winapi::shared::windef::RECT { left: 0, top: 0, right: 1920, bottom: 1080 },
-            work_area: winapi::shared::windef::RECT { left: 0, top: 0, right: 1920, bottom: 1040 },
+            rect: winapi::shared::windef::RECT {
+                left: 0,
+                top: 0,
+                right: 1920,
+                bottom: 1080,
+            },
+            work_area: winapi::shared::windef::RECT {
+                left: 0,
+                top: 0,
+                right: 1920,
+                bottom: 1040,
+            },
             device_name: "Test Monitor".to_string(),
         };
 
@@ -140,7 +196,8 @@ mod tests {
         assert_eq!(height, 1040);
 
         // Test right side positioning
-        let (x, y, width, height) = calculate_window_position(&monitor, &crate::config::Side::Right);
+        let (x, y, width, height) =
+            calculate_window_position(&monitor, &crate::config::Side::Right);
         assert_eq!(x, 960);
         assert_eq!(y, 0);
         assert_eq!(width, 960);

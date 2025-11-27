@@ -4,6 +4,7 @@ use std::collections::HashMap;
 
 // Mock structures for testing
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct MockMonitorInfo {
     pub handle: usize,
     pub rect: MockRect,
@@ -23,7 +24,14 @@ pub struct MockRect {
 pub trait WindowsApiTrait {
     fn get_monitors(&self) -> Vec<MockMonitorInfo>;
     fn find_window_by_title(&self, partial_title: &str) -> Option<usize>;
-    fn position_window(&self, hwnd: usize, x: i32, y: i32, width: i32, height: i32) -> Result<(), String>;
+    fn position_window(
+        &self,
+        hwnd: usize,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
+    ) -> Result<(), String>;
     fn launch_application(&self, executable: &str) -> Result<(), String>;
 }
 
@@ -45,14 +53,34 @@ pub fn create_mock_monitors() -> Vec<MockMonitorInfo> {
     vec![
         MockMonitorInfo {
             handle: 1,
-            rect: MockRect { left: 0, top: 0, right: 1920, bottom: 1080 },
-            work_area: MockRect { left: 0, top: 0, right: 1920, bottom: 1040 },
+            rect: MockRect {
+                left: 0,
+                top: 0,
+                right: 1920,
+                bottom: 1080,
+            },
+            work_area: MockRect {
+                left: 0,
+                top: 0,
+                right: 1920,
+                bottom: 1040,
+            },
             device_name: "Monitor1".to_string(),
         },
         MockMonitorInfo {
             handle: 2,
-            rect: MockRect { left: 1920, top: 0, right: 3840, bottom: 1080 },
-            work_area: MockRect { left: 1920, top: 0, right: 3840, bottom: 1040 },
+            rect: MockRect {
+                left: 1920,
+                top: 0,
+                right: 3840,
+                bottom: 1080,
+            },
+            work_area: MockRect {
+                left: 1920,
+                top: 0,
+                right: 3840,
+                bottom: 1040,
+            },
             device_name: "Monitor2".to_string(),
         },
     ]
