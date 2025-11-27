@@ -3,6 +3,9 @@ mod monitor;
 mod window;
 mod app_launcher;
 
+#[cfg(test)]
+mod mock;
+
 use config::load_config;
 use app_launcher::launch_and_position_applications;
 
