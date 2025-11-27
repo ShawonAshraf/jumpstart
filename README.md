@@ -1,5 +1,7 @@
 # Jumpstart - Windows Application Launcher and Window Manager
 
+[![Tests](https://github.com/ShawonAshraf/jumpstart/actions/workflows/test.yml/badge.svg)](https://github.com/ShawonAshraf/jumpstart/actions/workflows/test.yml)
+
 Jumpstart is a Rust application that automatically launches and positions multiple applications on Windows 11 according to a YAML configuration file. It's designed to help you quickly set up your workspace by launching applications and positioning them on specific monitors with split-screen configurations.
 
 ## Features
