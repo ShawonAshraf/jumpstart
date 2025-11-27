@@ -1,6 +1,10 @@
 mod app_launcher;
 mod config;
+
+#[cfg(windows)]
 mod monitor;
+
+#[cfg(windows)]
 mod window;
 
 #[cfg(test)]

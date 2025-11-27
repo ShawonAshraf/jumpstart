@@ -1,16 +1,21 @@
 use crate::config::Config;
-use crate::monitor::{calculate_window_position, get_monitor_by_number, get_monitors};
-use crate::window::{find_window_by_title, position_window};
 use std::collections::HashMap;
 use std::process::Command;
 use std::thread;
 use std::time::Duration;
+
+#[cfg(windows)]
+use crate::monitor::{calculate_window_position, get_monitor_by_number, get_monitors};
+
+#[cfg(windows)]
+use crate::window::{find_window_by_title, position_window};
 
 #[cfg(test)]
 use crate::config::Application;
 #[cfg(test)]
 use crate::mock::{MockWindowsApi, WindowsApiTrait, create_mock_monitors, create_mock_window_map};
 
+#[cfg(windows)]
 pub fn launch_application(executable: &str) -> Result<(), String> {
     // Try to launch the application using shell execute
     let output = Command::new("cmd")
@@ -28,6 +33,25 @@ pub fn launch_application(executable: &str) -> Result<(), String> {
     Ok(())
 }
 
+#[cfg(not(windows))]
+pub fn launch_application(executable: &str) -> Result<(), String> {
+    // Try to launch the application using standard shell commands
+    let output = Command::new("sh")
+        .args(["-c", executable])
+        .output()
+        .map_err(|e| format!("Failed to launch application: {}", e))?;
+
+    if !output.status.success() {
+        return Err(format!(
+            "Application failed to start: {}",
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+
+    Ok(())
+}
+
+#[cfg(windows)]
 pub fn launch_and_position_applications(config: &Config) -> Result<(), String> {
     // Get available monitors
     let monitors = get_monitors();
@@ -94,6 +118,12 @@ pub fn launch_and_position_applications(config: &Config) -> Result<(), String> {
     }
 
     println!("All applications launched and positioned!");
+    Ok(())
+}
+
+#[cfg(not(windows))]
+pub fn launch_and_position_applications(_config: &Config) -> Result<(), String> {
+    println!("Window positioning is only supported on Windows.");
     Ok(())
 }
 
