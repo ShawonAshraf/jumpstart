@@ -52,7 +52,7 @@ applications:
     side: right
     executable: "slack.exe"
   - name: Notion
-    display: 2
+    display: 3
     side: left
     executable: "notion.exe"
 ```
