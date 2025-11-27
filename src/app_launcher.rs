@@ -1,7 +1,13 @@
 use crate::config::Config;
-use std::collections::HashMap;
 use std::process::Command;
+
+#[cfg(windows)]
+use std::collections::HashMap;
+
+#[cfg(windows)]
 use std::thread;
+
+#[cfg(windows)]
 use std::time::Duration;
 
 #[cfg(windows)]
@@ -34,6 +40,7 @@ pub fn launch_application(executable: &str) -> Result<(), String> {
 }
 
 #[cfg(not(windows))]
+#[allow(dead_code)]
 pub fn launch_application(executable: &str) -> Result<(), String> {
     // Try to launch the application using standard shell commands
     let output = Command::new("sh")
