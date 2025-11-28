@@ -12,12 +12,6 @@ Jumpstart is a Rust application that automatically launches and positions multip
 - Configurable via YAML file
 - Uses Windows APIs for reliable window management
 
-## Requirements
-
-- Windows 11
-- Rust 1.70+ (for building from source)
-- Applications specified in config.yml must be installed and accessible via PATH
-
 ## Installation
 
 ### From Source
@@ -73,13 +67,6 @@ applications:
    ```bash
    jumpstart.exe
    ```
-3. The application will:
-   - Read the configuration
-   - Detect all connected monitors
-   - Launch each application sequentially
-   - Wait for applications to start (5 seconds per application)
-   - Position each application on the specified monitor and side
-   - Split the monitor screen evenly between left and right applications
 
 ## How It Works
 
@@ -90,20 +77,6 @@ applications:
 
 ## Troubleshooting
 
-### Application Not Found
-
-If an application doesn't launch:
-- Ensure the executable is in your system PATH
-- Or provide the full path to the executable in the config
-- Verify the application is properly installed
-
-### Window Not Positioned
-
-If a window launches but isn't positioned correctly:
-- The application uses window title matching. Some applications might have different window titles
-- You can modify the window title mapping in the source code (in the `main` function)
-- Increase the wait time if applications take longer to start
-
 ### Monitor Detection Issues
 
 - Monitor numbers are 1-based (1 = primary display)
@@ -112,23 +85,6 @@ If a window launches but isn't positioned correctly:
 
 ## Building from Source
 
-Ensure you have Rust installed, then run:
-
 ```bash
 cargo build --release
 ```
-
-## Dependencies
-
-- `serde`: YAML serialization/deserialization
-- `serde_yaml`: YAML parsing
-- `winapi`: Windows API bindings
-- `widestring`: Windows wide string handling
-
-## License
-
-This project is open source. See the LICENSE file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.

@@ -1,3 +1,7 @@
 /target
 
 config.yml
+
+.vscode/
+.idea/
+.code/
