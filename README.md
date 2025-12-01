@@ -35,22 +35,22 @@ The application is configured via `config.yml` in the same directory as the exec
 
 ```yaml
 applications:
-  - name: Teams
+  - name: Microsoft Teams
     display: 2
     side: right
-    executable: "teams.exe"
+    executable: "path to teams.exe"
   - name: Outlook
     display: 2
     side: left
-    executable: "outlook.exe"
+    executable: "path to outlook.exe"
   - name: Slack
     display: 3
     side: right
-    executable: "slack.exe"
+    executable: "path to slack.exe"
   - name: Notion
     display: 3
     side: left
-    executable: "notion.exe"
+    executable: "path to notion.exe"
 ```
 
 ### Configuration Fields
@@ -65,7 +65,7 @@ applications:
 1. Configure your applications in `config.yml`
 2. Run the application:
    ```bash
-   jumpstart.exe
+   .\target\release\jumpstart.exe
    ```
 
 ## How It Works
