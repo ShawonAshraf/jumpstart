@@ -13,6 +13,8 @@ mod mock;
 use app_launcher::launch_and_position_applications;
 use config::load_config;
 use tracing::{info, error};
+
+#[allow(clippy::single_component_path_imports)]
 use tracing_subscriber;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
