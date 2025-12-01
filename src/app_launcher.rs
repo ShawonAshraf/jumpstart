@@ -1,6 +1,6 @@
 use crate::config::Config;
 use std::process::Command;
-use tracing::{info, error, warn, debug};
+use tracing::{debug, error, info, warn};
 
 #[cfg(windows)]
 use std::collections::HashMap;
@@ -25,7 +25,7 @@ use crate::mock::{MockWindowsApi, WindowsApiTrait, create_mock_monitors, create_
 #[cfg(windows)]
 pub fn launch_application(executable: &str) -> Result<(), String> {
     info!("Attempting to launch: {}", executable);
-    
+
     // Launch the application using shell execute with DETACHED_PROCESS flag
     // Using cmd /C start with /B flag to run without creating a new window
     let status = Command::new("cmd")
@@ -35,13 +35,13 @@ pub fn launch_application(executable: &str) -> Result<(), String> {
             error!("Failed to launch application '{}': {}", executable, e);
             format!("Failed to launch application: {}", e)
         })?;
-    
+
     if !status.success() {
         let error_msg = format!("Application failed to start with status: {}", status);
         error!("Failed to launch '{}': {}", executable, error_msg);
         return Err(error_msg);
     }
-    
+
     info!("Successfully launched: {}", executable);
 
     Ok(())
@@ -109,8 +109,11 @@ pub fn launch_and_position_applications(config: &Config) -> Result<(), String> {
                 .get(app.name.as_str())
                 .unwrap_or(&app.name.as_str())
                 .to_string();
-            
-            debug!("Searching for window with title containing: '{}'", search_title);
+
+            debug!(
+                "Searching for window with title containing: '{}'",
+                search_title
+            );
 
             if let Some(hwnd) = find_window_by_title(&search_title) {
                 // Position the window

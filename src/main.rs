@@ -12,7 +12,7 @@ mod mock;
 
 use app_launcher::launch_and_position_applications;
 use config::load_config;
-use tracing::{info, error};
+use tracing::{error, info};
 
 #[allow(clippy::single_component_path_imports)]
 use tracing_subscriber;
@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"))
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
         )
         .init();
 

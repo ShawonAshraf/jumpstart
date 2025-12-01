@@ -1,3 +1,6 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::time::Instant;
+use tracing::{debug, info, warn};
 use widestring::U16CString;
 use winapi::shared::minwindef::{BOOL, DWORD, LPARAM, TRUE};
 use winapi::shared::windef::HWND;
@@ -5,9 +8,6 @@ use winapi::um::winuser::{
     EnumWindows, GetWindowTextLengthW, GetWindowTextW, GetWindowThreadProcessId, HWND_TOP,
     SWP_NOZORDER, SetWindowPos,
 };
-use std::time::Instant;
-use std::sync::atomic::{AtomicBool, Ordering};
-use tracing::{info, warn, debug};
 
 #[derive(Debug)]
 struct WindowInfo {
@@ -33,7 +33,7 @@ unsafe extern "system" fn enum_windows_proc(hwnd: HWND, data: LPARAM) -> BOOL {
     }
 
     let text_len = unsafe { GetWindowTextLengthW(hwnd) };
-    
+
     // Limit the maximum title length to prevent issues with extremely long titles
     const MAX_TITLE_LENGTH: usize = 1024;
     if text_len > 0 && text_len <= MAX_TITLE_LENGTH as i32 {
@@ -66,28 +66,32 @@ unsafe extern "system" fn enum_windows_proc(hwnd: HWND, data: LPARAM) -> BOOL {
 
 pub fn find_window_by_title(partial_title: &str) -> Option<HWND> {
     let mut windows: Vec<WindowInfo> = Vec::new();
-    
+
     // Reset the timeout flag
     ENUM_TIMEOUT.store(false, Ordering::Relaxed);
-    
+
     // Start timeout timer (5 seconds)
     let start_time = Instant::now();
     const ENUM_TIMEOUT_MS: u128 = 5000; // 5 seconds
-    
+
     unsafe {
         EnumWindows(
             Some(enum_windows_proc),
             &mut windows as *mut Vec<WindowInfo> as LPARAM,
         );
     }
-    
+
     // Check if we timed out during enumeration
     if start_time.elapsed().as_millis() > ENUM_TIMEOUT_MS {
         ENUM_TIMEOUT.store(true, Ordering::Relaxed);
         warn!("Window enumeration timed out after {} ms", ENUM_TIMEOUT_MS);
     }
-    
-    debug!("Enumerated {} windows, searching for '{}'", windows.len(), partial_title);
+
+    debug!(
+        "Enumerated {} windows, searching for '{}'",
+        windows.len(),
+        partial_title
+    );
 
     for window in windows {
         if window
@@ -95,7 +99,10 @@ pub fn find_window_by_title(partial_title: &str) -> Option<HWND> {
             .to_lowercase()
             .contains(&partial_title.to_lowercase())
         {
-            info!("Found matching window: '{}' for search '{}'", window.title, partial_title);
+            info!(
+                "Found matching window: '{}' for search '{}'",
+                window.title, partial_title
+            );
             return Some(window.hwnd);
         }
     }
