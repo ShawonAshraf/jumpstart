@@ -23,18 +23,20 @@ use crate::mock::{MockWindowsApi, WindowsApiTrait, create_mock_monitors, create_
 
 #[cfg(windows)]
 pub fn launch_application(executable: &str) -> Result<(), String> {
-    // Try to launch the application using shell execute
-    let output = Command::new("cmd")
-        .args(["/C", "start", "", executable])
-        .output()
+    println!("Attempting to launch: {}", executable);
+    
+    // Launch the application using shell execute with DETACHED_PROCESS flag
+    // Using cmd /C start with /B flag to run without creating a new window
+    let status = Command::new("cmd")
+        .args(["/C", "start", "", "/B", executable])
+        .status()
         .map_err(|e| format!("Failed to launch application: {}", e))?;
-
-    if !output.status.success() {
-        return Err(format!(
-            "Application failed to start: {}",
-            String::from_utf8_lossy(&output.stderr)
-        ));
+    
+    if !status.success() {
+        return Err(format!("Application failed to start with status: {}", status));
     }
+    
+    println!("Successfully launched: {}", executable);
 
     Ok(())
 }
@@ -82,7 +84,9 @@ pub fn launch_and_position_applications(config: &Config) -> Result<(), String> {
         }
 
         // Wait for the application to start and create its window
+        println!("Waiting 5 seconds for {} to start...", app.name);
         thread::sleep(Duration::from_secs(5));
+        println!("Finished waiting, now searching for {} window...", app.name);
 
         // Get the target monitor
         if let Some(monitor) = get_monitor_by_number(&monitors, app.display) {
@@ -99,6 +103,8 @@ pub fn launch_and_position_applications(config: &Config) -> Result<(), String> {
                 .get(app.name.as_str())
                 .unwrap_or(&app.name.as_str())
                 .to_string();
+            
+            println!("Searching for window with title containing: '{}'", search_title);
 
             if let Some(hwnd) = find_window_by_title(&search_title) {
                 // Position the window
