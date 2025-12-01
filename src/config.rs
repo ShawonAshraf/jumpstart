@@ -44,6 +44,7 @@ pub fn load_config() -> Result<Config, String> {
 mod tests {
     use super::*;
     use std::fs;
+    use tracing::warn;
 
     #[test]
     fn test_side_deserialization() {
@@ -93,12 +94,12 @@ applications:
 
         // Clean up
         if let Err(e) = fs::remove_file("config.yml") {
-            eprintln!("Warning: Failed to remove test config file: {}", e);
+            warn!("Failed to remove test config file: {}", e);
         }
 
         // Restore original config if it existed
         if original_config_exists && let Err(e) = fs::rename("config.yml.bak", "config.yml") {
-            eprintln!("Warning: Failed to restore original config file: {}", e);
+            warn!("Failed to restore original config file: {}", e);
         }
     }
 

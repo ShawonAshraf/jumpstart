@@ -1,5 +1,6 @@
 use crate::config::Config;
 use std::process::Command;
+use tracing::{info, error, warn, debug};
 
 #[cfg(windows)]
 use std::collections::HashMap;
@@ -23,20 +24,25 @@ use crate::mock::{MockWindowsApi, WindowsApiTrait, create_mock_monitors, create_
 
 #[cfg(windows)]
 pub fn launch_application(executable: &str) -> Result<(), String> {
-    println!("Attempting to launch: {}", executable);
+    info!("Attempting to launch: {}", executable);
     
     // Launch the application using shell execute with DETACHED_PROCESS flag
     // Using cmd /C start with /B flag to run without creating a new window
     let status = Command::new("cmd")
         .args(["/C", "start", "", "/B", executable])
         .status()
-        .map_err(|e| format!("Failed to launch application: {}", e))?;
+        .map_err(|e| {
+            error!("Failed to launch application '{}': {}", executable, e);
+            format!("Failed to launch application: {}", e)
+        })?;
     
     if !status.success() {
-        return Err(format!("Application failed to start with status: {}", status));
+        let error_msg = format!("Application failed to start with status: {}", status);
+        error!("Failed to launch '{}': {}", executable, error_msg);
+        return Err(error_msg);
     }
     
-    println!("Successfully launched: {}", executable);
+    info!("Successfully launched: {}", executable);
 
     Ok(())
 }
@@ -64,7 +70,7 @@ pub fn launch_application(executable: &str) -> Result<(), String> {
 pub fn launch_and_position_applications(config: &Config) -> Result<(), String> {
     // Get available monitors
     let monitors = get_monitors();
-    println!("Found {} monitors", monitors.len());
+    info!("Found {} monitors", monitors.len());
 
     // Create a mapping of application names to their window titles
     let mut app_window_titles = HashMap::new();
@@ -75,22 +81,22 @@ pub fn launch_and_position_applications(config: &Config) -> Result<(), String> {
 
     // Launch and position each application
     for app in &config.applications {
-        println!("Launching {}...", app.name);
+        info!("Launching {}...", app.name);
 
         // Launch the application
         if let Err(e) = launch_application(&app.executable) {
-            eprintln!("Failed to launch {}: {}", app.name, e);
+            error!("Failed to launch {}: {}", app.name, e);
             continue;
         }
 
         // Wait for the application to start and create its window
-        println!("Waiting 5 seconds for {} to start...", app.name);
+        info!("Waiting 5 seconds for {} to start...", app.name);
         thread::sleep(Duration::from_secs(5));
-        println!("Finished waiting, now searching for {} window...", app.name);
+        debug!("Finished waiting, now searching for {} window...", app.name);
 
         // Get the target monitor
         if let Some(monitor) = get_monitor_by_number(&monitors, app.display) {
-            println!(
+            info!(
                 "Positioning {} on display {} ({})",
                 app.name, app.display, monitor.device_name
             );
@@ -104,39 +110,39 @@ pub fn launch_and_position_applications(config: &Config) -> Result<(), String> {
                 .unwrap_or(&app.name.as_str())
                 .to_string();
             
-            println!("Searching for window with title containing: '{}'", search_title);
+            debug!("Searching for window with title containing: '{}'", search_title);
 
             if let Some(hwnd) = find_window_by_title(&search_title) {
                 // Position the window
                 if let Err(e) = position_window(hwnd, x, y, width, height) {
-                    eprintln!("Failed to position window for {}: {}", app.name, e);
+                    error!("Failed to position window for {}: {}", app.name, e);
                 } else {
-                    println!(
+                    info!(
                         "Successfully positioned {} at ({}, {}) with size {}x{}",
                         app.name, x, y, width, height
                     );
                 }
             } else {
-                eprintln!(
+                warn!(
                     "Could not find window for {} (searched for: {})",
                     app.name, search_title
                 );
             }
         } else {
-            eprintln!("Monitor {} not found for {}", app.display, app.name);
+            error!("Monitor {} not found for {}", app.display, app.name);
         }
 
         // Wait a bit before launching the next application
         thread::sleep(Duration::from_secs(2));
     }
 
-    println!("All applications launched and positioned!");
+    info!("All applications launched and positioned!");
     Ok(())
 }
 
 #[cfg(not(windows))]
 pub fn launch_and_position_applications(_config: &Config) -> Result<(), String> {
-    println!("Window positioning is only supported on Windows.");
+    warn!("Window positioning is only supported on Windows.");
     Ok(())
 }
 
@@ -265,25 +271,25 @@ mod tests {
     ) -> Result<(), String> {
         // Get available monitors
         let monitors = api.get_monitors();
-        println!("Found {} monitors", monitors.len());
+        info!("Found {} monitors", monitors.len());
 
         // Create a mapping of application names to their window titles
         let app_window_titles = create_mock_window_map();
 
         // Launch and position each application
         for app in &config.applications {
-            println!("Launching {}...", app.name);
+            info!("Launching {}...", app.name);
 
             // Launch the application
             if let Err(e) = api.launch_application(&app.executable) {
-                eprintln!("Failed to launch {}: {}", app.name, e);
+                error!("Failed to launch {}: {}", app.name, e);
                 continue;
             }
 
             // Get the target monitor
             if app.display > 0 && app.display <= monitors.len() as u32 {
                 let monitor = &monitors[(app.display - 1) as usize];
-                println!(
+                info!(
                     "Positioning {} on display {} ({})",
                     app.name, app.display, monitor.device_name
                 );
@@ -300,25 +306,25 @@ mod tests {
                 if let Some(hwnd) = api.find_window_by_title(&search_title) {
                     // Position the window
                     if let Err(e) = api.position_window(hwnd, x, y, width, height) {
-                        eprintln!("Failed to position window for {}: {}", app.name, e);
+                        error!("Failed to position window for {}: {}", app.name, e);
                     } else {
-                        println!(
+                        info!(
                             "Successfully positioned {} at ({}, {}) with size {}x{}",
                             app.name, x, y, width, height
                         );
                     }
                 } else {
-                    eprintln!(
+                    warn!(
                         "Could not find window for {} (searched for: {})",
                         app.name, search_title
                     );
                 }
             } else {
-                eprintln!("Monitor {} not found for {}", app.display, app.name);
+                error!("Monitor {} not found for {}", app.display, app.name);
             }
         }
 
-        println!("All applications launched and positioned!");
+        info!("All applications launched and positioned!");
         Ok(())
     }
 

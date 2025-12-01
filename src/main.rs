@@ -12,19 +12,33 @@ mod mock;
 
 use app_launcher::launch_and_position_applications;
 use config::load_config;
+use tracing::{info, error};
+use tracing_subscriber;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("Starting application launcher...");
+    // Initialize tracing subscriber with default info level
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"))
+        )
+        .init();
+
+    info!("Starting application launcher...");
 
     // Load configuration
     let config = load_config()?;
-    println!(
+    info!(
         "Loaded configuration with {} applications",
         config.applications.len()
     );
 
     // Launch and position applications
-    launch_and_position_applications(&config)?;
+    if let Err(e) = launch_and_position_applications(&config) {
+        error!("Failed to launch and position applications: {}", e);
+        return Err(e.into());
+    }
 
+    info!("Application launcher completed successfully");
     Ok(())
 }

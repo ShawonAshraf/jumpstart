@@ -7,6 +7,7 @@ use winapi::um::winuser::{
 };
 use std::time::Instant;
 use std::sync::atomic::{AtomicBool, Ordering};
+use tracing::{info, warn, debug};
 
 #[derive(Debug)]
 struct WindowInfo {
@@ -83,10 +84,10 @@ pub fn find_window_by_title(partial_title: &str) -> Option<HWND> {
     // Check if we timed out during enumeration
     if start_time.elapsed().as_millis() > ENUM_TIMEOUT_MS {
         ENUM_TIMEOUT.store(true, Ordering::Relaxed);
-        println!("Warning: Window enumeration timed out after {} ms", ENUM_TIMEOUT_MS);
+        warn!("Window enumeration timed out after {} ms", ENUM_TIMEOUT_MS);
     }
     
-    println!("Enumerated {} windows, searching for '{}'", windows.len(), partial_title);
+    debug!("Enumerated {} windows, searching for '{}'", windows.len(), partial_title);
 
     for window in windows {
         if window
@@ -94,12 +95,12 @@ pub fn find_window_by_title(partial_title: &str) -> Option<HWND> {
             .to_lowercase()
             .contains(&partial_title.to_lowercase())
         {
-            println!("Found matching window: '{}' for search '{}'", window.title, partial_title);
+            info!("Found matching window: '{}' for search '{}'", window.title, partial_title);
             return Some(window.hwnd);
         }
     }
 
-    println!("No window found matching '{}'", partial_title);
+    debug!("No window found matching '{}'", partial_title);
     None
 }
 
