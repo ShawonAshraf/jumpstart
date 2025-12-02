@@ -40,9 +40,9 @@ pub fn load_config(path: &str) -> Result<Config, String> {
     serde_yaml::from_str(&yaml_content).map_err(|e| format!("Failed to parse config: {}", e))
 }
 
-pub fn load_default_config() -> Result<Config, String> {
-    load_config("config.yml")
-}
+// pub fn load_default_config() -> Result<Config, String> {
+//     load_config("config.yml")
+// }
 
 #[cfg(test)]
 mod tests {
