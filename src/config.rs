@@ -33,11 +33,15 @@ pub struct Config {
     pub applications: Vec<Application>,
 }
 
-pub fn load_config() -> Result<Config, String> {
-    let yaml_content = std::fs::read_to_string("config.yml")
-        .map_err(|e| format!("Failed to read config file: {}", e))?;
+pub fn load_config(path: &str) -> Result<Config, String> {
+    let yaml_content = std::fs::read_to_string(path)
+        .map_err(|e| format!("Failed to read config file '{}': {}", path, e))?;
 
     serde_yaml::from_str(&yaml_content).map_err(|e| format!("Failed to parse config: {}", e))
+}
+
+pub fn load_default_config() -> Result<Config, String> {
+    load_config("config.yml")
 }
 
 #[cfg(test)]
@@ -85,7 +89,7 @@ applications:
         // Rename our test file to config.yml
         fs::rename(temp_file_path, "config.yml").unwrap();
 
-        let config = load_config().unwrap();
+        let config = load_config("config.yml").unwrap();
         assert_eq!(config.applications.len(), 1);
         assert_eq!(config.applications[0].name, "Test App");
         assert_eq!(config.applications[0].display, 1);
@@ -112,7 +116,7 @@ applications:
                 .expect("Failed to backup original config file");
         }
 
-        let result = load_config();
+        let result = load_config("config.yml");
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Failed to read config file"));
 

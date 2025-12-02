@@ -62,11 +62,27 @@ applications:
 
 ## Usage
 
+### Basic Usage
+
 1. Configure your applications in `config.yml`
 2. Run the application:
    ```bash
    .\target\release\jumpstart.exe
    ```
+
+### Using a Custom Configuration File
+
+You can specify a custom configuration file using the `-c` or `--config` flag:
+
+```bash
+# Using short flag
+.\target\release\jumpstart.exe -c path/to/your/config.yml
+
+# Using long flag
+.\target\release\jumpstart.exe --config path/to/your/config.yml
+```
+
+If no config file is specified, the application will look for `config.yml` in the current directory.
 
 ## How It Works
 

@@ -13,11 +13,23 @@ mod mock;
 use app_launcher::launch_and_position_applications;
 use config::load_config;
 use tracing::{error, info};
+use clap::Parser;
 
 #[allow(clippy::single_component_path_imports)]
 use tracing_subscriber;
 
+#[derive(Parser)]
+#[command(name = "jumpstart")]
+#[command(about = "Application launcher for positioning windows")]
+struct Cli {
+    /// Path to the configuration file
+    #[arg(short, long, default_value = "config.yml")]
+    config: String,
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let cli = Cli::parse();
+
     // Initialize tracing subscriber with default info level
     tracing_subscriber::fmt()
         .with_env_filter(
@@ -29,9 +41,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("Starting application launcher...");
 
     // Load configuration
-    let config = load_config()?;
+    let config = load_config(&cli.config)?;
     info!(
-        "Loaded configuration with {} applications",
+        "Loaded configuration from '{}' with {} applications",
+        cli.config,
         config.applications.len()
     );
 
