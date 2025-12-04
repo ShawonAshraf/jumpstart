@@ -7,6 +7,13 @@ A modern Windows application that automatically launches and positions multiple 
 - Launch multiple applications simultaneously
 - Position windows on specific monitors (left/right sides)
 
+## How it works
+
+- Monitor Detection: The application uses Windows API to enumerate all connected monitors and their dimensions
+- Application Launching: Applications are launched using the Windows shell start command
+- Window Detection: The application searches for windows by title (case-insensitive partial match)
+- Window Positioning: Windows are positioned using SetWindowPos API with calculated coordinates
+
 ## Quick Start
 
 ### Install from Source
