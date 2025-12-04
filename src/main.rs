@@ -26,12 +26,12 @@ use clap::Parser;
 #[command(about = "Application launcher for positioning windows")]
 struct Cli {
     /// Path to the configuration file
-    #[arg(short, long, default_value = "config.yml")]
+    #[arg(short = 'f', long, default_value = "config.yml")]
     config: String,
 
-    /// Launch in GUI mode instead of CLI mode
-    #[arg(short, long, default_value_t = false)]
-    gui: bool,
+    /// Launch in CLI mode instead of GUI mode
+    #[arg(short, long)]
+    cli: bool,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -46,10 +46,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Parse command line arguments
     let cli = Cli::parse();
 
-    if cli.gui {
-        run_gui_mode(cli.config)?;
-    } else {
+    // GUI is default, CLI requires explicit --cli flag
+    if cli.cli {
         run_cli_mode(cli.config)?;
+    } else {
+        run_gui_mode(cli.config)?;
     }
 
     Ok(())

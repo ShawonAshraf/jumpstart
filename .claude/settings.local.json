@@ -4,7 +4,9 @@
       "Bash(cargo check:*)",
       "Bash(cargo build:*)",
       "Bash(cargo test:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(\"target/debug/jumpstart.exe\" --help)",
+      "Bash(cargo run:*)"
     ],
     "deny": [],
     "ask": []
