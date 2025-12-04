@@ -6,15 +6,12 @@ A modern Windows application that automatically launches and positions multiple 
 
 - Launch multiple applications simultaneously
 - Position windows on specific monitors (left/right sides)
-- GUI interface with built-in configuration editor
-- CLI support for automation
 
 ## Quick Start
 
 ### Install from Source
 
 ```bash
-git clone <repository-url>
 cd jumpstart
 cargo build --release --features embedded_config
 ```
