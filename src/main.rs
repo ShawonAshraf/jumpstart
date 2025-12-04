@@ -15,7 +15,6 @@ mod gui;
 use app_launcher::launch_and_position_applications;
 use config::load_config;
 use tracing::{error, info};
-use clap::Parser;
 
 #[allow(clippy::single_component_path_imports)]
 use tracing_subscriber;
@@ -34,8 +33,6 @@ struct Cli {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let cli = Cli::parse();
-
     // Initialize tracing subscriber with default info level
     tracing_subscriber::fmt()
         .with_env_filter(
