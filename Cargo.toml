@@ -2,6 +2,14 @@
 name = "jumpstart"
 version = "0.1.0"
 edition = "2024"
+description = "Application launcher for positioning windows"
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT"
+repository = "https://github.com/yourusername/jumpstart"
+
+[[bin]]
+name = "jumpstart"
+path = "src/main.rs"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -12,9 +20,26 @@ clap = { version = "4.0", features = ["derive"] }
 eframe = { version = "0.29", features = ["default_fonts", "glow"] }
 egui = "0.29"
 rfd = "0.14"
+
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["winuser", "processthreadsapi", "handleapi", "shellapi", "winbase"] }
 widestring = "1.0"
 
 [dev-dependencies]
 mockall = "0.11"
+
+# Profile configuration for optimized builds
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+opt-level = "s"  # Optimize for size
+
+[profile.windows-release]
+inherits = "release"
+opt-level = "s"  # Optimize for size
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"

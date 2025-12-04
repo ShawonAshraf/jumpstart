@@ -33,11 +33,21 @@ pub struct Config {
     pub applications: Vec<Application>,
 }
 
+const DEFAULT_CONFIG: &str = include_str!("../config.yml");
+
 pub fn load_config(config_path: &str) -> Result<Config, String> {
     let yaml_content = std::fs::read_to_string(config_path)
         .map_err(|e| format!("Failed to read config file '{}': {}", config_path, e))?;
 
     serde_yaml::from_str(&yaml_content).map_err(|e| format!("Failed to parse config: {}", e))
+}
+
+pub fn load_default_config() -> Result<Config, String> {
+    serde_yaml::from_str(DEFAULT_CONFIG).map_err(|e| format!("Failed to parse default config: {}", e))
+}
+
+pub fn get_default_config_content() -> &'static str {
+    DEFAULT_CONFIG
 }
 
 #[cfg(test)]
