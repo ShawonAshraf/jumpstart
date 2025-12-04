@@ -276,7 +276,7 @@ impl JumpstartGui {
                     // Create a scrollable area for applications
                     // Show more applications with increased height
                     egui::ScrollArea::vertical()
-                        .max_height(480.0)
+                        .min_scrolled_height(480.0)
                         .show(ui, |ui| {
                             for (index, app) in config.applications.iter().enumerate() {
                                 self.render_application_card(ui, app, index);
