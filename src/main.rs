@@ -19,6 +19,8 @@ use tracing::{error, info};
 #[allow(clippy::single_component_path_imports)]
 use tracing_subscriber;
 
+use clap::Parser;
+
 #[derive(Parser)]
 #[command(name = "jumpstart")]
 #[command(about = "Application launcher for positioning windows")]
@@ -40,6 +42,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
         )
         .init();
+
+    // Parse command line arguments
+    let cli = Cli::parse();
 
     if cli.gui {
         run_gui_mode(cli.config)?;

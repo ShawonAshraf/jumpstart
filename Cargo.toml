@@ -14,7 +14,6 @@ egui = "0.29"
 rfd = "0.14"
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["winuser", "processthreadsapi", "handleapi", "shellapi", "winbase"] }
-winapi = { version = "0.3", features = ["winuser", "processthreadsapi", "handleapi", "shellapi", "winbase"] }
 widestring = "1.0"
 
 [dev-dependencies]
