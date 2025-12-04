@@ -85,8 +85,8 @@ fn run_gui_mode(config_path: String) -> Result<(), Box<dyn std::error::Error>> {
     // Set up the GUI options
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([600.0, 500.0])
-            .with_min_inner_size([500.0, 400.0])
+            .with_inner_size([820.0, 920.0])
+            .with_min_inner_size([750.0, 700.0])
             .with_title("Jumpstart Application Launcher"),
         ..Default::default()
     };

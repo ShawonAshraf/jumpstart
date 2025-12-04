@@ -208,13 +208,13 @@ impl JumpstartGui {
 
     fn render_config_panel(&mut self, ui: &mut egui::Ui) {
         ui.vertical(|ui| {
-            ui.heading(RichText::new("⚙️ Configuration").size(18.0).color(self.get_accent_color()));
-            ui.add_space(12.0);
+            ui.heading(RichText::new("⚙️ Configuration").size(16.0).color(self.get_accent_color()));
+            ui.add_space(8.0);
 
             // Current config display
             ui.group(|ui| {
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("📁 Current Config:").size(14.0));
+                    ui.label(RichText::new("📁 Current:").size(13.0));
                     ui.separator();
                     if let Some(ref path) = self.selected_config {
                         ui.label(RichText::new(path.display().to_string()).color(Color32::from_rgb(100, 200, 100)));
@@ -224,15 +224,15 @@ impl JumpstartGui {
                 });
             });
 
-            ui.add_space(12.0);
+            ui.add_space(8.0);
 
             // Action buttons
             ui.horizontal(|ui| {
-                if ui.button(RichText::new("📂 Load Config File").size(14.0)).clicked() {
+                if ui.button("📂 Load").clicked() {
                     self.select_config_file();
                 }
 
-                if ui.button(RichText::new("📝 Edit Config").size(14.0)).clicked() {
+                if ui.button("📝 Edit").clicked() {
                     self.show_config_editor = !self.show_config_editor;
                     if self.show_config_editor {
                         // Load current config content for editing
@@ -251,7 +251,7 @@ impl JumpstartGui {
                     }
                 }
 
-                if ui.button(RichText::new("🔄 Reset to Default").size(14.0)).clicked() {
+                if ui.button("🔄 Reset").clicked() {
                     if let Ok(default_config) = load_default_config() {
                         self.config = Some(default_config);
                         self.selected_config = None;
@@ -264,8 +264,8 @@ impl JumpstartGui {
 
     fn render_applications_preview(&mut self, ui: &mut egui::Ui) {
         ui.vertical(|ui| {
-            ui.heading(RichText::new("🚀 Applications to Launch").size(18.0).color(self.get_accent_color()));
-            ui.add_space(12.0);
+            ui.heading(RichText::new("🚀 Applications").size(16.0).color(self.get_accent_color()));
+            ui.add_space(8.0);
 
             if let Some(ref config) = self.config {
                 if config.applications.is_empty() {
@@ -274,8 +274,9 @@ impl JumpstartGui {
                     });
                 } else {
                     // Create a scrollable area for applications
+                    // Show more applications with increased height
                     egui::ScrollArea::vertical()
-                        .max_height(200.0)
+                        .max_height(480.0)
                         .show(ui, |ui| {
                             for (index, app) in config.applications.iter().enumerate() {
                                 self.render_application_card(ui, app, index);
@@ -295,7 +296,7 @@ impl JumpstartGui {
             ui.horizontal(|ui| {
                 // Application icon/number
                 ui.label(RichText::new(format!("{}. {}", index + 1, app.name))
-                    .size(16.0)
+                    .size(14.0)
                     .color(Color32::from_rgb(100, 150, 200)));
 
                 ui.separator();
@@ -306,7 +307,8 @@ impl JumpstartGui {
                     2 => Color32::from_rgb(200, 200, 100),
                     _ => Color32::from_rgb(200, 150, 100),
                 };
-                ui.label(RichText::new(format!("Display {}", app.display))
+                ui.label(RichText::new(format!("D{}", app.display))
+                    .size(12.0)
                     .color(display_color));
 
                 ui.separator();
@@ -317,22 +319,23 @@ impl JumpstartGui {
                     crate::config::Side::Right => Color32::from_rgb(200, 150, 150),
                 };
                 ui.label(RichText::new(format!("{:?}", app.side))
+                    .size(12.0)
                     .color(side_color));
             });
 
             // Show executable path on a smaller line
-            ui.add_space(4.0);
+            ui.add_space(2.0);
             ui.label(RichText::new(format!("📄 {}", app.executable))
-                .size(12.0)
+                .size(10.0)
                 .color(Color32::from_rgb(120, 120, 120)));
         });
-        ui.add_space(8.0);
+        ui.add_space(6.0);
     }
 
     fn render_controls(&mut self, ui: &mut egui::Ui) {
         ui.vertical(|ui| {
-            ui.heading(RichText::new("🎮 Controls").size(18.0).color(self.get_accent_color()));
-            ui.add_space(12.0);
+            ui.heading(RichText::new("🎮 Controls").size(16.0).color(self.get_accent_color()));
+            ui.add_space(8.0);
 
             // Start button with better styling
             let start_button_enabled = self.config.is_some() && !self.is_running;
@@ -340,7 +343,7 @@ impl JumpstartGui {
             let start_text = if self.is_running {
                 "⏳ Launching..."
             } else {
-                "🚀 Launch Applications"
+                "🚀 Launch"
             };
 
             let button_color = if start_button_enabled {
@@ -351,30 +354,30 @@ impl JumpstartGui {
 
             if ui.add_enabled(
                 start_button_enabled,
-                egui::Button::new(RichText::new(start_text).size(16.0).color(Color32::WHITE))
+                egui::Button::new(RichText::new(start_text).size(15.0).color(Color32::WHITE))
                     .fill(button_color)
-                    .min_size(Vec2::new(200.0, 40.0))
+                    .min_size(Vec2::new(280.0, 36.0))
             ).clicked() {
                 self.start_applications();
             }
 
-            ui.add_space(16.0);
+            ui.add_space(12.0);
 
             // Status message with better styling
             ui.group(|ui| {
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("📊 Status:").size(14.0).strong());
+                    ui.label(RichText::new("📊 Status:").size(13.0).strong());
                 });
-                ui.add_space(4.0);
-                ui.label(RichText::new(&self.status_message).size(13.0));
+                ui.add_space(2.0);
+                ui.label(RichText::new(&self.status_message).size(12.0));
             });
 
             // Progress indicator
             if self.is_running {
-                ui.add_space(12.0);
+                ui.add_space(8.0);
                 ui.horizontal(|ui| {
                     ui.spinner();
-                    ui.label(RichText::new("Launching applications...").size(14.0));
+                    ui.label(RichText::new("Launching applications...").size(12.0));
                 });
             }
         });
@@ -447,79 +450,65 @@ impl eframe::App for JumpstartGui {
             self.render_config_editor(ctx);
         }
 
-        // Main layout
+        // Main layout with compact design and proper padding
         egui::CentralPanel::default().show(ctx, |ui| {
-            // Header
-            ui.vertical_centered(|ui| {
-                ui.add_space(16.0);
-                ui.heading(RichText::new("🚀 Jumpstart Application Launcher")
-                    .size(24.0)
-                    .color(self.get_accent_color()));
-                ui.add_space(4.0);
-                ui.label(RichText::new("Automatically launch and position your applications")
-                    .color(Color32::from_rgb(150, 150, 150)));
-                ui.add_space(20.0);
-            });
+            // Add padding around entire content
+            egui::Frame::none()
+                .inner_margin(egui::Margin::symmetric(24.0, 16.0))
+                .show(ui, |ui| {
+                    // Header with theme switcher in top right
+                    ui.horizontal(|ui| {
+                        // Left side - Title and description
+                        ui.vertical(|ui| {
+                            ui.heading(RichText::new("🚀 Jumpstart Application Launcher")
+                                .size(20.0)
+                                .color(self.get_accent_color()));
+                            ui.label(RichText::new("Automatically launch and position your applications")
+                                .color(Color32::from_rgb(150, 150, 150)));
+                        });
 
-            // Main content with better spacing
-            ui.horizontal(|ui| {
-                ui.add_space(16.0);
+                        // Right side - Theme switcher
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            if ui.button(match self.theme {
+                                Theme::Light => "🌙 Dark",
+                                Theme::Dark => "☀️ Light",
+                            }).clicked() {
+                                self.theme = match self.theme {
+                                    Theme::Light => Theme::Dark,
+                                    Theme::Dark => Theme::Light,
+                                };
+                            }
 
-                // Left column - Configuration
-                ui.vertical(|ui| {
-                    ui.set_width(300.0);
-                    self.render_config_panel(ui);
+                            ui.label(RichText::new("v0.1.0").color(Color32::from_rgb(120, 120, 120)));
+                        });
+                    });
+
+                    ui.add_space(16.0);
+
+                    // Main content with compact grid layout (2 columns)
+                    egui::Grid::new("main_layout")
+                        .num_columns(2)
+                        .spacing([16.0, 16.0])
+                        .show(ui, |ui| {
+
+                            // Left column - Configuration and Applications
+                            ui.vertical(|ui| {
+                                ui.set_width(450.0);
+                                self.render_config_panel(ui);
+                                ui.add_space(16.0);
+                                self.render_applications_preview(ui);
+                            });
+
+                            // Right column - Controls
+                            ui.vertical(|ui| {
+                                ui.set_width(300.0);
+                                ui.set_min_height(350.0);
+                                self.render_controls(ui);
+                            });
+
+                            ui.end_row();
+                        });
                 });
-
-                ui.add_space(16.0);
-
-                ui.separator();
-
-                ui.add_space(16.0);
-
-                // Middle column - Applications preview
-                ui.vertical(|ui| {
-                    ui.set_width(350.0);
-                    self.render_applications_preview(ui);
-                });
-
-                ui.add_space(16.0);
-
-                ui.separator();
-
-                ui.add_space(16.0);
-
-                // Right column - Controls
-                ui.vertical(|ui| {
-                    ui.set_width(300.0);
-                    self.render_controls(ui);
-                });
-
-                ui.add_space(16.0);
-            });
-
-            ui.add_space(20.0);
-
-            // Footer
-            ui.horizontal(|ui| {
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    // Theme toggle
-                    if ui.button(match self.theme {
-                        Theme::Light => "🌙 Dark",
-                        Theme::Dark => "☀️ Light",
-                    }).clicked() {
-                        self.theme = match self.theme {
-                            Theme::Light => Theme::Dark,
-                            Theme::Dark => Theme::Light,
-                        };
-                    }
-
-                    ui.separator();
-
-                    // Version info
-                    ui.label(RichText::new("v0.1.0").color(Color32::from_rgb(120, 120, 120)));
-                });
-            });
         });
     }
 }
