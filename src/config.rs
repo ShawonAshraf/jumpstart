@@ -20,7 +20,7 @@ impl<'de> Deserialize<'de> for Side {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Application {
     pub name: String,
     pub display: u32,
@@ -28,7 +28,7 @@ pub struct Application {
     pub executable: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
     pub applications: Vec<Application>,
 }
