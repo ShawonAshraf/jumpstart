@@ -33,21 +33,51 @@ pub struct Config {
     pub applications: Vec<Application>,
 }
 
-const DEFAULT_CONFIG: &str = include_str!("../config.yml");
+pub fn load_default_config() -> Result<Config, String> {
+    // Try to load the embedded config file first, fall back to hardcoded default
+    let default_content = get_default_config_content();
+    serde_yaml::from_str(default_content).map_err(|e| format!("Failed to parse default config: {}", e))
+}
+
+pub fn get_default_config_content() -> &'static str {
+    // Try to include the real config file, fall back to hardcoded default if not available
+    #[cfg(feature = "embedded_config")]
+    {
+        // When embedded_config feature is enabled, try to embed the actual config.yml
+        const EMBEDDED_CONFIG: &str = include_str!("../config.yml");
+        EMBEDDED_CONFIG
+    }
+    #[cfg(not(feature = "embedded_config"))]
+    {
+        // Default fallback for tests or when config.yml is not available
+        const FALLBACK_CONFIG: &str = r#"
+applications:
+  - name: "Microsoft Teams"
+    display: 2
+    side: "right"
+    executable: "C:\\Program Files\\WindowsApps\\MSTeams_25306.804.4102.7193_x64__8wekyb3d8bbwe\\ms-teams.exe"
+  - name: "Outlook"
+    display: 2
+    side: "left"
+    executable: "C:\\Program Files\\WindowsApps\\Microsoft.OutlookForWindows_1.2025.1111.100_x64__8wekyb3d8bbwe\\olk.exe"
+  - name: "Slack"
+    display: 3
+    side: "right"
+    executable: "C:\\Program Files\\WindowsApps\\com.tinyspeck.slackdesktop_4.47.65.0_x64__8yrtsj140pw4g\\app\\Slack.exe"
+  - name: "Notion"
+    display: 3
+    side: "left"
+    executable: "C:\\Users\\shawo\\AppData\\Local\\Programs\\Notion\\Notion.exe"
+"#;
+        FALLBACK_CONFIG
+    }
+}
 
 pub fn load_config(config_path: &str) -> Result<Config, String> {
     let yaml_content = std::fs::read_to_string(config_path)
         .map_err(|e| format!("Failed to read config file '{}': {}", config_path, e))?;
 
     serde_yaml::from_str(&yaml_content).map_err(|e| format!("Failed to parse config: {}", e))
-}
-
-pub fn load_default_config() -> Result<Config, String> {
-    serde_yaml::from_str(DEFAULT_CONFIG).map_err(|e| format!("Failed to parse default config: {}", e))
-}
-
-pub fn get_default_config_content() -> &'static str {
-    DEFAULT_CONFIG
 }
 
 #[cfg(test)]

@@ -7,6 +7,10 @@ authors = ["Your Name <your.email@example.com>"]
 license = "MIT"
 repository = "https://github.com/yourusername/jumpstart"
 
+[features]
+default = []
+embedded_config = []
+
 [[bin]]
 name = "jumpstart"
 path = "src/main.rs"
